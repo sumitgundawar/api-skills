@@ -15,7 +15,7 @@
 - [ ] Anything that may take more than a few seconds is a job: create returns 202 and a job resource, with a state, progress and a result link.
 - [ ] Creating a job accepts an idempotency key, so a retry does not start a second export.
 - [ ] Jobs per caller are limited in number and in concurrency, and are queued fairly between tenants.
-- [ ] Results are files in object storage behind short-lived signed links. They expire and are deleted.
+- [ ] Results are files in object storage behind short-lived signed links. They expire and are deleted, and the total bytes a caller can download in a period is capped.
 - [ ] Completion is announced by webhook as well as by polling, and polling responses carry Retry-After.
 - [ ] File formats are documented. CSV states its encoding, delimiter, quoting and how nulls appear. A typed format such as Parquet or JSON Lines is offered for machines.
 - [ ] Values that begin with characters a spreadsheet treats as a formula are neutralised in CSV exports.

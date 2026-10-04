@@ -68,6 +68,12 @@
 - [ ] Order and inventory webhooks are signed, retried and replayable.
 - [ ] Stock or calendar sync from several channels converges through one authority.
 
+## Also check
+
+- [ ] A payout that the bank rejects or returns has a path: the funds are credited back to the seller's balance by a ledger entry, the seller is told why, and the payout is not retried until the bank details change.
+- [ ] If messages between parties are scanned, the terms and the privacy notice say so. Flag this for legal review.
+- [ ] When `api-fintech-banking` is also installed, its ledger and payment rules take precedence for anything that moves money.
+
 ## Sources
 
 - Stripe Connect documentation: account types, separate charges and transfers, payouts, disputes.

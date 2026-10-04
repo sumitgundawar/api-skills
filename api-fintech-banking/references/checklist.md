@@ -61,6 +61,13 @@
 - [ ] Calls to each rail have a timeout, a retry budget and a circuit breaker, and a slow rail cannot exhaust your workers.
 - [ ] Month end, salary day and tax deadlines are load tested as the peaks they are.
 
+## Also check
+
+- [ ] Strong customer authentication for a payment is dynamically linked: the authentication code is bound to the amount and the payee, and changing either invalidates it (PSD2 regulatory technical standards, Article 5).
+- [ ] Idempotency keys and unique references are kept longer than the rail's own retry and return window, which can be days. Twenty-four hours is not enough for most rails.
+- [ ] Payee name checking reveals whether a name matches, by design. It is the one deliberate exception to not revealing whether an account exists, and it is rate limited for that reason.
+- [ ] When `api-marketplace` is also installed, this skill's ledger and payment rules take precedence for anything that moves money.
+
 ## Sources
 
 - OpenID Foundation: FAPI 1.0 Advanced; FAPI 2.0 Security Profile and Message Signing.

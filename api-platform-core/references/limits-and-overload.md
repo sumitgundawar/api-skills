@@ -53,7 +53,7 @@ The IETF draft `RateLimit` and `RateLimit-Policy` headers (draft-ietf-httpapi-ra
 On a normal response:
 
 ```
-RateLimit-Policy: "default";q=100;w=10
+RateLimit-Policy: "default";q=100;w=60
 RateLimit: "default";r=50;t=30
 ```
 

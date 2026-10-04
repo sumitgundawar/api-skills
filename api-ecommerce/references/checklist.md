@@ -81,6 +81,13 @@
 
 Status note: UCP (Google and Shopify, January 2026), the Agentic Commerce Protocol (OpenAI and Stripe, September 2025) and AP2 are young and changing. Check the current specification before building.
 
+## Also check
+
+- [ ] Card testing is expected. Attackers use a payment endpoint to try stolen card numbers in bulk. Payment attempts are limited per card, per account, per device and per address, and a run of declines raises an alert.
+- [ ] Tax is calculated by one owner (a tax service or the payment provider), from the buyer's verified location, and the rate and its source are stored on the order.
+- [ ] A refund goes back to the original payment method, and the API cannot redirect it elsewhere.
+- [ ] If sellers other than you are paid through the platform, the `api-marketplace` skill applies to payouts, seller checks and disputes.
+
 ## Sources
 
 - Stripe API reference: Idempotent requests; Payment Intents; Webhooks; Shared Payment Tokens; Machine payments.

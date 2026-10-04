@@ -50,6 +50,8 @@
 - [ ] Code endpoints do not reveal whether an account exists.
 - [ ] Security messages have their own queue and capacity, and are never delayed by bulk sends.
 - [ ] A fallback channel exists, and its use is itself rate limited.
+- [ ] A code is bound to the session or transaction that asked for it. A code requested in one browser cannot be redeemed in another.
+- [ ] Channels that require approved templates before sending (WhatsApp Business, and RCS business messaging with many carriers) have the approval state modelled, so an unapproved template fails before the send, with a clear error.
 
 ## Fan-out and load
 

@@ -55,6 +55,10 @@
 - [ ] The server publishes its metadata (RFC 8414, or OpenID Connect discovery), and returns the issuer in authorisation responses (RFC 9207) to prevent mix-up attacks.
 - [ ] Consent screens name the client and the scopes plainly, and users can review and revoke grants.
 - [ ] Input-constrained devices use the device authorisation grant (RFC 8628), with protection against a phished user code.
+- [ ] High-value clients send authorisation parameters by pushed authorisation request (RFC 9126), so they cannot be altered in the browser.
+- [ ] A resource server that needs a stronger or fresher sign-in says so with the step-up challenge (RFC 9470), and the client can act on it.
+- [ ] Linking a social or enterprise login to an existing account requires a verified email from that provider, or a sign-in to the existing account first. An unverified email must not take over an account.
+- [ ] Push approvals show what is being approved and use number matching, so a user cannot be worn down into tapping yes.
 - [ ] Client registration is controlled. Open dynamic registration is a decision, with limits.
 
 ## Tokens

@@ -20,7 +20,7 @@
 
 - [ ] The licence server checks entitlement for every licence request. It does not trust that the player got a manifest.
 - [ ] Licence duration, rental windows and offline rules are set in the licence, by policy.
-- [ ] Each major platform's system is covered (Widevine, FairPlay, PlayReady), usually with common encryption so one set of files serves all.
+- [ ] Each major platform's system is covered (Widevine, FairPlay, PlayReady), usually with common encryption so one set of files serves all. Common encryption has more than one mode: FairPlay needs `cbcs`, and some older devices only support `cenc`, so one set of files does not always reach everything.
 - [ ] Keys are stored in a key management system, rotated for live, and never logged.
 - [ ] Device security level decides the maximum quality, and that rule is on the server.
 

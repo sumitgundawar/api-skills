@@ -91,6 +91,13 @@ Check the current version on the 1EdTech and IEEE sites before you build. The ve
 - [ ] Agents acting for teachers or administrators (marking support, roster checks) get scoped, short-lived tokens and an audit trail.
 - [ ] Course catalogues and public course information are fine to expose in machine-readable form.
 
+## Also check
+
+- [ ] On every LTI 1.3 launch, the issuer, the client identifier (the token's audience) and the deployment identifier are all checked against one stored registration. A token that is valid for one institution is refused for another.
+- [ ] Rostering covers the routes institutions really use, not only the standard. In United States schools that is often Clever or ClassLink. In United Kingdom schools it is often an aggregator in front of the school's management information system.
+- [ ] Remote proctoring data (video, audio, screen, biometric templates) is treated as the most sensitive data in the system: explicit lawful basis, short retention, restricted access, and an alternative for learners who cannot use it.
+- [ ] AI that scores work, steers a learner's path or monitors an exam is identified. Under the EU AI Act, systems that evaluate learning outcomes or detect prohibited behaviour during tests are listed as high risk, and emotion recognition in education institutions is prohibited except for medical or safety reasons. Check the current application dates and take advice.
+
 ## Sources
 
 - 1EdTech specifications: LTI 1.3 and LTI Advantage, OneRoster 1.2, QTI 3.0, Caliper 1.2, Open Badges 3.0, CLR 2.0.

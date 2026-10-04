@@ -84,6 +84,15 @@ Facts and versions were checked in October 2026. Protocols in this area move qui
 - [ ] Dashboards show tool calls per task, tokens per task, error rate by type and retry rate.
 - [ ] Prompts and results are logged only as far as privacy rules allow, with redaction.
 
+## If you serve model inference
+
+- [ ] A generation request accepts an idempotency key or a client request identifier. A retried generation is otherwise new work and is billed twice.
+- [ ] Token usage is reported in the response, and in the final event of a stream, so a caller can account for cost without counting tokens itself.
+- [ ] The response says why generation stopped (finished, length limit, tool call, content filter), so a truncated answer is never mistaken for a complete one.
+- [ ] Model names are pinned to a version. An alias that moves is documented as moving.
+- [ ] Each model version has a published retirement date, announced in advance and signalled in responses. A model is an API version: the retirement runbook in `api-platform-core` applies.
+- [ ] Limits are stated in tokens as well as requests, and the remaining budget is returned in headers.
+
 ## Sources
 
 - Model Context Protocol specification, revision 2026-07-28, and its release notes.
@@ -93,5 +102,5 @@ Facts and versions were checked in October 2026. Protocols in this area move qui
 - A2A protocol, version 1.0.
 - x402 specification, version 2. Stripe documentation, Machine payments and Shared Payment Tokens.
 - Snyk, ToxicSkills (February 2026). Invariant Labs, tool poisoning (2025).
-- OWASP API Security Top 10 (2023). OWASP Top 10 for LLM Applications.
+- OWASP API Security Top 10 (2023). OWASP Top 10 for LLM Applications. OWASP Top 10 for Agentic Applications.
 - Postman, What Passport found in three weeks of AI agent traffic (September 2026).

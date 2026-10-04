@@ -29,7 +29,7 @@
 
 - [ ] Single sign-on supports SAML or OpenID Connect per tenant. Assertions are validated for signature, audience, recipient and time, and replays are rejected.
 - [ ] A tenant can require SSO, and that rule also covers API keys and personal tokens.
-- [ ] SCIM 2.0 is supported for users and groups, a repeated create answers 409 and does not duplicate, and deactivation is handled as well as deletion. SCIM endpoints keep SCIM's own error schema and index-based paging.
+- [ ] SCIM 2.0 is supported for users and groups, a repeated create answers 409 and does not duplicate, and deactivation is handled as well as deletion. SCIM endpoints keep SCIM's own error schema and paging: index-based (`startIndex`, `count`) by default, cursor-based where the service provider configuration advertises it (RFC 9865).
 - [ ] Deprovisioning revokes sessions, refresh tokens and keys within minutes.
 - [ ] Email domains are verified before they are used to route logins.
 
@@ -63,7 +63,7 @@
 
 ## Sources
 
-- RFC 7643 and RFC 7644 (SCIM 2.0).
+- RFC 7643 and RFC 7644 (SCIM 2.0); RFC 9865 (cursor-based pagination of SCIM resources).
 - OASIS SAML 2.0; OpenID Connect Core.
 - OWASP API Security Top 10 (2023); OWASP Multi-Tenant Security Cheat Sheet.
 - AWS Well-Architected, SaaS Lens.

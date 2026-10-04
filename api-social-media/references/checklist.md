@@ -81,6 +81,13 @@
 - [ ] Incoming federated content goes through the same moderation and limits as local content.
 - [ ] Signatures on federated requests are verified, and fetches of remote URLs are protected against server-side request forgery (OWASP API7).
 
+## Also check
+
+- [ ] Child sexual abuse material has its own named flow: detection, immediate removal from view, a report to the body the law names (in the United States, the National Center for Missing and Exploited Children), and preservation of evidence for the period the law requires. Staff tooling for it is access controlled and logged. Take legal advice before building or changing it.
+- [ ] Statutory takedown clocks are treated as latency requirements with monitoring. Examples: one hour from a removal order for terrorist content in the EU (Regulation 2021/784), and 48 hours from a valid request for non-consensual intimate imagery in the United States (the Take It Down Act).
+- [ ] Any user can report illegal content through the product, the report is acknowledged, and the person whose content is restricted receives a statement of reasons. In the EU these duties apply to all hosting services under the Digital Services Act (Articles 16 and 17), not only to the largest platforms.
+- [ ] A user can export their own data in a structured, machine-readable format, as an asynchronous job with a signed, expiring download.
+
 ## Sources
 
 - OWASP API Security Top 10 (2023).

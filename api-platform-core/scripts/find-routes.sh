@@ -31,7 +31,7 @@ fi
 # a root that starts with a dash would be read as an option
 case "$ROOT" in -*) ROOT="./$ROOT" ;; esac
 # enter the root, so a symlinked root is followed and paths print relative to it
-cd "$ROOT" || { echo "error: cannot enter '$ROOT'" >&2; exit 2; }
+CDPATH= cd -- "$ROOT" >/dev/null || { echo "error: cannot enter '$ROOT'" >&2; exit 2; }
 ROOT=.
 
 SKIPPED='node_modules .git dist build out bin obj vendor venv .venv target __pycache__ .next .nuxt .svelte-kit .turbo coverage'
@@ -51,7 +51,8 @@ search() {
   # $1 = label, $2 = extended regex, rest = --include patterns
   label="$1"; pattern="$2"; shift 2
   # shellcheck disable=SC2086
-  all=$(grep -rnE $EXCLUDES "$@" -- "$pattern" "$ROOT" 2>/dev/null)
+  # -D skip: never open a FIFO or a device file, which would block for ever
+  all=$(grep -rnE -D skip $EXCLUDES "$@" -- "$pattern" "$ROOT" 2>/dev/null)
   status=$?
   section "$label"
   # grep exits 0 on a match, 1 on none, and 2 or more on an error
@@ -83,8 +84,8 @@ contracts=$(find "$ROOT" \
     -iname '*openapi*.y*ml' -o -iname '*openapi*.json' -o \
     -iname '*swagger*.y*ml' -o -iname '*swagger*.json' -o \
     -iname '*asyncapi*.y*ml' -o -iname '*asyncapi*.json' -o \
-    -iname '*.arazzo.y*ml' -o -iname '*.graphql' -o -iname '*.graphqls' -o \
-    -iname '*.proto' -o -iname 'llms.txt' -o -iname 'api-catalog*' \
+    -iname '*arazzo*.y*ml' -o -iname '*.graphql' -o -iname '*.graphqls' -o -iname '*.gql' -o \
+    -iname '*.raml' -o -iname '*.proto' -o -iname 'llms.txt' -o -iname 'api-catalog*' \
   \) -print)
 if [ -z "$contracts" ]; then
   echo "[0 matches. The next section finds contracts with other names.]"
@@ -102,36 +103,67 @@ search "Files that declare an OpenAPI or AsyncAPI document" \
   '(^|[{,[:space:]])["'"'"']?(openapi|swagger|asyncapi)["'"'"']?[[:space:]]*:[[:space:]]*["'"'"']?[0-9]+\.[0-9]' \
   --include='*.yaml' --include='*.yml' --include='*.json' --exclude='package*.json'
 
+section "Router and controller files, by name"
+echo "Routes split over several lines, or built from constants, are missed by the searches below. Read these files."
+# shellcheck disable=SC2086
+routers=$(find "$ROOT" \( $PRUNE \) -prune -o -type f \
+    ! -name '*.md' ! -name '*.json' ! -name '*.lock' ! -name '*.snap' ! -name '*.map' ! -name '*.png' ! -name '*.svg' ! -name '*.css' \( \
+    -iname '*route*' -o -iname '*router*' -o -name 'urls.py' -o -iname '*controller*' -o \
+    -iname '*endpoint*' -o -iname '*handler*' -o -path '*/pages/api/*' -o -path '*/app/api/*' -o \
+    -path '*/routes/*' -o -path '*/routers/*' -o -path '*/controllers/*' -o -path '*/handlers/*' \
+  \) -print | sort)
+if [ -z "$routers" ]; then
+  echo "[0 matches]"
+else
+  total=$(printf '%s\n' "$routers" | wc -l | tr -d ' ')
+  echo "[$total matches]"
+  printf '%s\n' "$routers" | head -n 150
+  if [ "$total" -gt 150 ]; then
+    echo "[truncated: showing 150 of $total files. Narrow the path and run again.]"
+  fi
+fi
+
+JS="--include=*.js --include=*.ts --include=*.mjs --include=*.cjs --include=*.mts --include=*.cts --include=*.tsx --include=*.jsx"
+
+# shellcheck disable=SC2086
 search "Express, Fastify, Koa, Hono (JavaScript and TypeScript)" \
-  '[A-Za-z_$][A-Za-z0-9_$]*\.(get|post|put|patch|delete|options|head|all)[[:space:]]*\([[:space:]]*["'"'"'`]/' \
-  --include='*.js' --include='*.ts' --include='*.mjs' --include='*.cjs' --include='*.tsx'
+  '[A-Za-z_$][A-Za-z0-9_$]*\.(get|post|put|patch|delete|options|head|all)[[:space:]]*\([[:space:]]*(["'"'"'`][/*]|/)' \
+  $JS
 
-search "Route objects and chained routes (JavaScript and TypeScript)" \
-  '\.route[[:space:]]*\(|\.on[[:space:]]*\([[:space:]]*["'"'"'](GET|POST|PUT|PATCH|DELETE)' \
-  --include='*.js' --include='*.ts' --include='*.mjs' --include='*.cjs'
+# shellcheck disable=SC2086
+search "Route objects, chained routes and base paths (JavaScript and TypeScript)" \
+  '\.(route|basePath)[[:space:]]*\(|\.on[[:space:]]*\([[:space:]]*["'"'"'](GET|POST|PUT|PATCH|DELETE)' \
+  $JS
 
+# shellcheck disable=SC2086
 search "Router mounts and prefixes (JavaScript and TypeScript)" \
   '\.use[[:space:]]*\([[:space:]]*["'"'"'`]/' \
-  --include='*.js' --include='*.ts' --include='*.mjs' --include='*.cjs'
+  $JS
 
+# shellcheck disable=SC2086
 search "File-based route handlers (Next.js, SvelteKit, Remix)" \
-  'export[[:space:]]+(async[[:space:]]+)?(function|const)[[:space:]]+(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|loader|action)\b' \
-  --include='*.js' --include='*.ts' --include='*.mjs' --include='*.tsx' --include='*.jsx'
+  'export[[:space:]]+(async[[:space:]]+)?(function|const)[[:space:]]+(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|loader|action)\b|export[[:space:]]*\{[^}]*\b(GET|POST|PUT|PATCH|DELETE)\b' \
+  $JS
 
-search "NestJS decorators" \
+# shellcheck disable=SC2086
+search "tRPC procedures (TypeScript)" \
+  '\b(publicProcedure|protectedProcedure|procedure)\b[^;]*\.(query|mutation|subscription)[[:space:]]*\(' \
+  $JS
+
+search "NestJS, Micronaut and Quarkus decorators" \
   '@(Get|Post|Put|Patch|Delete|Head|Options|All|Controller)[[:space:]]*\(' \
-  --include='*.ts'
+  --include='*.ts' --include='*.java' --include='*.kt'
 
-search "Flask, FastAPI, Django (Python)" \
-  '@[A-Za-z_][A-Za-z0-9_]*\.(get|post|put|patch|delete|route|api_route|websocket)[[:space:]]*\(|(^|[^.A-Za-z0-9_])(path|re_path)[[:space:]]*\(|router\.register[[:space:]]*\([[:space:]]*r?["'"'"']|add_api_route[[:space:]]*\(|@(action|api_view)[[:space:]]*\(|APIRouter[[:space:]]*\(|include_router[[:space:]]*\(' \
+search "Flask, FastAPI, Django, aiohttp, Starlette (Python)" \
+  '@[A-Za-z_][A-Za-z0-9_]*\.(get|post|put|patch|delete|route|api_route|websocket)[[:space:]]*\(|(^|[^.A-Za-z0-9_])(path|re_path|url)[[:space:]]*\([[:space:]]*r?["'"'"']|router\.register[[:space:]]*\([[:space:]]*r?["'"'"']|add_(api_route|url_rule|get|post|put|patch|delete|route)[[:space:]]*\(|@(action|api_view)[[:space:]]*\(|APIRouter[[:space:]]*\(|include_router[[:space:]]*\(|(^|[^A-Za-z0-9_])(Route|Mount|WebSocketRoute)[[:space:]]*\([[:space:]]*["'"'"']/' \
   --include='*.py'
 
 search "Spring (Java and Kotlin)" \
-  '@(GetMapping|PostMapping|PutMapping|PatchMapping|DeleteMapping|RequestMapping)\b' \
+  '@(GetMapping|PostMapping|PutMapping|PatchMapping|DeleteMapping|RequestMapping)\b|\.(GET|POST|PUT|PATCH|DELETE)[[:space:]]*\([[:space:]]*"/|RouterFunctions' \
   --include='*.java' --include='*.kt'
 
 search "JAX-RS (Java and Kotlin)" \
-  '@(GET|POST|PUT|PATCH|DELETE|Path)\b' \
+  '@(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|Path)\b' \
   --include='*.java' --include='*.kt'
 
 search "Ktor (Kotlin)" \
@@ -139,11 +171,11 @@ search "Ktor (Kotlin)" \
   --include='*.kt'
 
 search "Go (net/http, chi, gin, echo)" \
-  '\.(HandleFunc|Handle|Get|Post|Put|Patch|Delete|GET|POST|PUT|PATCH|DELETE|Any|Method|Route|Mount|Group)[[:space:]]*\([[:space:]]*("[A-Z]+",[[:space:]]*)?"(/|[A-Z]+ /)' \
+  '\.(HandleFunc|Handle|Get|Post|Put|Patch|Delete|GET|POST|PUT|PATCH|DELETE|Any|Method|Route|Mount|Group|Path|PathPrefix)[[:space:]]*\([[:space:]]*("[A-Z]+",[[:space:]]*)?"(/|[A-Z]+ /)' \
   --include='*.go'
 
-search "Rails routes and Grape (Ruby)" \
-  '^[[:space:]]*(get|post|put|patch|delete|resources|resource|namespace|mount)[[:space:]]' \
+search "Rails routes, Grape and Sinatra (Ruby)" \
+  '^[[:space:]]*(get|post|put|patch|delete|resources|resource|namespace|mount)[[:space:](]' \
   --include='routes.rb' --include='*routes*.rb' --include='config.ru' --include='*api*.rb'
 
 search "Laravel and Symfony routes (PHP)" \

@@ -15,17 +15,17 @@ Every other API trusts this one. A flaw here is a flaw in everything behind it. 
 
 1. Prefer a maintained identity product or library to code written by hand. If the project has built its own cryptography, token format or password storage, say so first in the report.
 2. Never change sign-in, token, session or recovery logic without the user's explicit go-ahead and tests for both the allowed and the refused case.
-3. Never try credentials, guess passwords or probe a deployed environment. Assess by reading code and configuration.
+3. Never try credentials, guess passwords or probe production or any shared environment. Assess by reading code and configuration.
 4. When you find a password, a signing key, a client secret or a token in code or logs, report the file and line, never the value.
 
 Shared rules, the same in every skill in this set:
 
 - Assessment is read-only. Keep the inventory and the report in your reply. Create or change a file only in Phase 4, or when the user asks for a file.
-- Before running any test, script or task, read its configuration. If it reads live credentials, or points at any host that is not local or a named sandbox, do not run it. Report that instead.
+- Before running any test, script or task, read its configuration. Run it only if every credential it reads is a test or sandbox credential, and every host it calls is local, a sandbox the user has named, or a provider's test mode reached with test keys. Otherwise do not run it. Report that instead.
 - Requests go only to a local or sandbox instance with seeded test data, and only after the user agrees.
 - Report a secret, credential or personal record by file and line, never by value.
 - Ask before any change that deletes data, removes or renames something public, changes a default, a limit or authentication, or adds a dependency.
-- Endpoints defined by an external protocol (OAuth and OpenID Connect, SCIM, FHIR, GraphQL, gRPC, a provider's webhook format) keep that protocol's own errors, paging and status codes. Report a deviation from the protocol, not from this checklist.
+- Endpoints defined by an external protocol (OAuth and OpenID Connect, SCIM, FHIR, GraphQL, gRPC, a provider's webhook format, an object storage API) keep that protocol's own errors, paging, status codes and headers. On those four points report a deviation from the protocol, not from this checklist. Every other item in this checklist still applies to them.
 
 Ratings used below: **Sound** (meets the checklist, with evidence), **Gap** (an item is missing and the risk is limited), **Risk** (a missing item can let someone take over an account, forge a token or lock users out), **Not applicable** (say why).
 

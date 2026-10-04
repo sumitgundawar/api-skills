@@ -15,16 +15,16 @@ GraphQL hands the caller a query language. Every question about cost, access and
 
 1. A removed or renamed field, a changed type, and a field that goes from non-null to nullable are breaking changes. So, on the input side, are a new required argument or input field, an argument that goes from nullable to non-null, and a removed enum value. Never make one without the user's explicit go-ahead and usage data for that field.
 2. Authorisation is checked where the data is loaded, not only at the top of the query.
-3. Never send requests to a deployed environment, and do not run introspection or probing queries against one. Assess by reading the schema and the resolvers.
+3. Never send requests to production or to any shared environment, and do not run introspection or probing queries against one. Assess by reading the schema and the resolvers.
 
 Shared rules, the same in every skill in this set:
 
 - Assessment is read-only. Keep the inventory and the report in your reply. Create or change a file only in Phase 4, or when the user asks for a file.
-- Before running any test, script or task, read its configuration. If it reads live credentials, or points at any host that is not local or a named sandbox, do not run it. Report that instead.
+- Before running any test, script or task, read its configuration. Run it only if every credential it reads is a test or sandbox credential, and every host it calls is local, a sandbox the user has named, or a provider's test mode reached with test keys. Otherwise do not run it. Report that instead.
 - Requests go only to a local or sandbox instance with seeded test data, and only after the user agrees.
 - Report a secret, credential or personal record by file and line, never by value.
 - Ask before any change that deletes data, removes or renames something public, changes a default, a limit or authentication, or adds a dependency.
-- Endpoints defined by an external protocol (OAuth and OpenID Connect, SCIM, FHIR, GraphQL, gRPC, a provider's webhook format) keep that protocol's own errors, paging and status codes. Report a deviation from the protocol, not from this checklist.
+- Endpoints defined by an external protocol (OAuth and OpenID Connect, SCIM, FHIR, GraphQL, gRPC, a provider's webhook format, an object storage API) keep that protocol's own errors, paging, status codes and headers. On those four points report a deviation from the protocol, not from this checklist. Every other item in this checklist still applies to them.
 
 Ratings used below: **Sound** (meets the checklist, with evidence), **Gap** (an item is missing and the risk is limited), **Risk** (a missing item can leak data, lose data or take the service down), **Not applicable** (say why).
 

@@ -71,11 +71,18 @@
 - [ ] Unknown fields are ignored by both sides, so new firmware and old servers can mix.
 - [ ] End of support for a device is announced in advance, and says what stops working.
 
+## If you use MQTT
+
+- [ ] A second connection with the same client identifier disconnects the first. Client identifiers are tied to the device's credential, so one device cannot take over another's session.
+- [ ] Retained messages and will messages are reviewed as data. A retained message is delivered to every future subscriber of that topic, and a will message is published on the device's behalf when it drops.
+- [ ] Persistent sessions have an expiry and a queue limit, so a device that returns after weeks does not receive an unbounded backlog.
+- [ ] Wildcard subscriptions are not available to devices.
+
 ## Sources
 
 - OASIS MQTT Version 5.0; RFC 7252 (CoAP).
 - ETSI EN 303 645 (consumer IoT security baseline).
 - UK Product Security and Telecommunications Infrastructure Act 2022 and its 2023 regulations.
 - Regulation (EU) 2024/2847 (Cyber Resilience Act).
-- RFC 9019 (a firmware update architecture for IoT).
+- RFC 9019 (a firmware update architecture for IoT); RFC 9124 (a manifest information model for firmware updates).
 - OWASP API Security Top 10 (2023); OWASP IoT Top 10.

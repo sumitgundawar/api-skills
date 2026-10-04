@@ -61,6 +61,13 @@
 - [ ] Holding inventory without paying is limited per customer, so stock cannot be locked up by automation.
 - [ ] Loyalty points are treated as money: a ledger, idempotent changes and takeover defences.
 
+## Also check
+
+- [ ] Bank authentication steps for European cards (3-D Secure) are states in the booking flow, with the hold kept long enough for the customer to complete them.
+- [ ] Where card details are passed on to a supplier, that path is in PCI DSS scope. Prefer the supplier's or a provider's tokens, or a virtual card, to forwarding card numbers.
+- [ ] Time limits set by the supplier are tracked. A flight that is booked but not ticketed lapses at its ticketing deadline, so the booking carries that deadline and a job acts before it.
+- [ ] Passport and identity data never appear in logs, error messages or the agent's own output.
+
 ## Sources
 
 - IATA New Distribution Capability (NDC) standard.

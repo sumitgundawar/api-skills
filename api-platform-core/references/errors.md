@@ -12,7 +12,7 @@ An error response is part of the contract and, for an automated caller, it is th
 - [ ] 429 and 503 include `Retry-After`.
 - [ ] Errors carry a request identifier that also appears in your logs.
 - [ ] Status codes mean what HTTP says they mean. 400 for malformed, 401 for unauthenticated, 403 for forbidden, 404 for not found, 409 for conflict, 410 for gone, 412 for failed precondition, 422 for semantically invalid, 428 for missing precondition, 429 for too many requests, 5xx for your fault.
-- [ ] On a REST API a 200 response never contains an error. Batch endpoints return a per-item status and an overall status that reflects partial failure. (GraphQL is the exception by design: it returns 200 with an `errors` array. Document that, and give each error a stable code in `extensions`.)
+- [ ] On a REST API a 200 response never contains an error. Batch endpoints return a per-item status and an overall status that reflects partial failure. (GraphQL is the exception by design. Over `application/json` it answers 200 with an `errors` array. Over `application/graphql-response+json` it answers 4xx when the request could not be executed at all, and 200 with `errors` for failures during execution. Document which you serve, and give each error a stable code in `extensions`.)
 - [ ] Errors never leak stack traces, SQL, internal host names or other tenants' data.
 - [ ] Error types are documented and versioned like the rest of the contract. Changing which error a case returns is a breaking change.
 

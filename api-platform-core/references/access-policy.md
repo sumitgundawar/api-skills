@@ -70,7 +70,7 @@ The aim is not to win an arms race at one door. It is to make the human door of 
 
 - RFC 9309 (Robots Exclusion Protocol), RFC 9421, RFC 9449, RFC 9576 to 9578 (Privacy Pass).
 - IETF draft-ietf-webbotauth-httpsig-protocol-00 (1 September 2026).
-- Wikimedia APIs, Rate limits (2026); Wikimedia Diff, crawler traffic update (March 2026).
+- Wikimedia APIs, Rate limits (2026); Wikimedia Diff, How crawlers impact the operations of the Wikimedia projects (April 2025).
 - Shopify Storefront API documentation (bots limited, most strictly when unsigned).
 - Cloudflare: Your site, your rules (July 2026); Monetization Gateway (2026).
 - Plesner, Vontobel, Wattenhofer. Breaking reCAPTCHAv2. 2024.

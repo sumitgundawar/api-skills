@@ -19,7 +19,8 @@
 - [ ] Lists are paginated with a page token and a server-set maximum.
 - [ ] Partial updates use a field mask.
 - [ ] Money, time and durations use well-known or shared types, not floats and strings.
-- [ ] Messages have a size limit that is known and enforced. Large payloads are streamed or sent by reference.
+- [ ] Messages have a size limit that is known and enforced. The default limit on a received message is 4 MB in most gRPC implementations. Large payloads are streamed or sent by reference.
+- [ ] Renaming a field is safe on the binary wire and still breaks generated code and the JSON form. Treat it as breaking.
 
 ## Deadlines and cancellation
 
@@ -31,7 +32,7 @@
 ## Retries and hedging
 
 - [ ] Retries happen at one layer of the chain. Google's SRE book shows how retries at several layers multiply.
-- [ ] A retry budget caps retries as a share of requests, per client.
+- [ ] A retry budget caps retries as a share of requests, per client. gRPC's own retry throttling in the service config is the built-in form of this.
 - [ ] Only methods that are safe to repeat are retried: reads, or writes that carry a request identifier the server deduplicates on.
 - [ ] Retries use exponential backoff with jitter, and honour server pushback.
 - [ ] Only the status codes that mean "try again" are retried, typically UNAVAILABLE. DEADLINE_EXCEEDED on a write means the outcome is unknown.

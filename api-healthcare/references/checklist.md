@@ -27,7 +27,7 @@
 
 - [ ] Writes use a version and `If-Match`. A lost update on a medication list is a patient safety incident. FHIR uses weak ETags (`W/"3"`) with `If-Match` by design, so do not report that as a fault.
 - [ ] Search is authorised as well as read. Search parameters, `_include` and `_revinclude` cannot return another patient's resources.
-- [ ] Creation of prescriptions, orders and referrals accepts an idempotency key.
+- [ ] Creation of prescriptions, orders and referrals is safe to repeat: conditional create (`If-None-Exist`) on a FHIR interface, an idempotency key elsewhere.
 - [ ] Records are amended, not overwritten. The previous value, the author and the time are kept.
 - [ ] Units are explicit and coded (UCUM). Codes carry their system and version (SNOMED CT, LOINC, ICD, dm+d or RxNorm).
 - [ ] Each item carries its source and when it was last updated, so a consumer can tell a stale copy.
@@ -56,6 +56,7 @@
 - [ ] The legal basis and the consent model are written down for each data flow.
 - [ ] Data is encrypted in transit and at rest. Backups and analytics copies are in scope.
 - [ ] Data sent for analytics or model training is de-identified to a stated standard, and re-identification risk has been assessed.
+- [ ] Access for the patient themselves is not blocked by the deny-by-default rule. In the United States, information blocking rules under the 21st Century Cures Act limit when a patient's access to their own electronic record may be refused or delayed. Take advice.
 - [ ] Suppliers that process health data are under contract (a business associate agreement under HIPAA, a processor agreement under GDPR).
 
 ## Load and resilience

@@ -46,6 +46,10 @@
 - [ ] Failed payments follow a retry schedule with customer messages. The subscription moves to past due, and access follows a stated grace rule.
 - [ ] Authentication steps required by the bank (3-D Secure) are states, not errors.
 - [ ] Payment method updates take effect on the open invoice.
+- [ ] Renewals charged while the customer is absent rest on a stored mandate or consent, captured when the payment method was saved.
+- [ ] A provider timeout while charging leaves the invoice in a "payment unknown" state that a status check or webhook resolves. It is neither marked paid nor charged again.
+- [ ] A customer's billing currency is fixed. Changing it is an explicit migration, not a field update.
+- [ ] Billing provider keys and webhook secrets never appear in code, logs or the agent's own output.
 - [ ] Provider webhooks are verified, deduplicated and tolerant of order. A daily job reconciles subscriptions, invoices and payments with the provider.
 
 ## Entitlements

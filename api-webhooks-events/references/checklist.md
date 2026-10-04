@@ -24,7 +24,7 @@
 - [ ] The Standard Webhooks specification is followed, or your own scheme is documented as precisely.
 - [ ] Failed deliveries are retried with exponential backoff and jitter over a stated period (hours to days), not immediately and not for ever.
 - [ ] After the last retry, the event is kept and can be seen and resent. An endpoint that keeps failing is disabled and its owner is told.
-- [ ] A delivery has a short timeout. A 2xx is the only success. Redirects are not followed.
+- [ ] A delivery has a short timeout. A 2xx is the only success. Redirects are not followed. A 410 from the subscriber disables the endpoint.
 - [ ] Deliveries to one subscriber are limited in concurrency, so a slow subscriber does not hold up the rest, and a backlog does not flood them on recovery.
 - [ ] Subscriber URLs must be HTTPS, are resolved and checked against private, loopback, link-local and metadata addresses at send time, and are fetched from an isolated network path (OWASP API7, server-side request forgery). The connection goes to the address that was checked, so a second DNS answer cannot redirect it.
 - [ ] Endpoint ownership is verified before events are sent.
