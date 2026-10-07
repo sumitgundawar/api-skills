@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs for banking, payments, wallets, l
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Fintech and banking APIs
 
-In a financial API every write is a claim about money that someone will audit. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the domain rules below.
+In a financial API every write is a claim about money that someone will audit. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the domain rules below.
 
 ## Ground rules
 
@@ -59,10 +59,10 @@ Lead with anything that can lose or duplicate money, unbalance the ledger or exp
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new endpoints. On an existing endpoint, add each item in its additive form and report the required form as a breaking change that needs a new version and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new endpoints. On an existing endpoint, prefer a compatible migration and report a breaking form as needing a new version and the user's agreement.
 
-- **Create transfer or payment**: accepts an idempotency key and requires it on new endpoints; validates limits on the server; writes the ledger entries and the payment record in one transaction; returns a payment with a state, never a bare success.
-- **Outbound call to a rail**: carries a derived idempotency key or the scheme's own unique reference. A timeout leaves the payment in an unknown state that reconciliation resolves. It is never retried blindly and never marked failed.
+- **Create transfer or payment**: requires an idempotency key on new endpoints, scoped to customer plus operation, with a request fingerprint and an atomic claim so concurrent duplicates execute once. It validates limits on the server, writes balanced ledger entries and the payment record in one transaction, and returns a payment state rather than a bare success.
+- **Outbound call to a rail**: persists a rail-searchable business reference before the call and sends it with a derived idempotency key or the scheme's unique reference. A timeout returns the same stable payment resource in an unknown state. Retry only if rail lookup conclusively proves absence and the request is still valid; an inconclusive result stays unknown for escalation. It is never retried blindly or marked failed.
 - **Balance**: changed by a conditional update or under a lock, in the same transaction as the entries. Available and booked balances are separate fields.
 - **Reads**: statements are cursor paginated and stable. A read says how fresh it is.
 - **Third party access**: scoped, consented, time limited, revocable, with sender-constrained tokens.

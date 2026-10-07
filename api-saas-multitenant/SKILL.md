@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs for business software sold to man
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Multi-tenant SaaS APIs
 
-The one failure a business customer does not forgive is seeing another customer's data. The second is being slowed down by another customer. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the domain rules below.
+The one failure a business customer does not forgive is seeing another customer's data. The second is being slowed down by another customer. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the domain rules below.
 
 ## Ground rules
 
@@ -31,7 +31,7 @@ Ratings used below: **Sound** (meets the checklist, with evidence), **Gap** (an 
 
 ## Phase 1: Inventory
 
-- The tenancy model: shared tables with a tenant column, a schema per tenant, a database per tenant, or cells.
+- The tenancy model: shared tables with a tenant column, a schema per tenant, a database per tenant, a shard, or a full cell. For a cell, list its compute, database, cache, queues, workers, versioned placement directory, move/fencing process, regional disaster-recovery policy and any dependencies still shared.
 - How a request finds its tenant, at the edge and in background jobs.
 - The hierarchy: organisation, workspace or project, team, user, service account, API key.
 - Roles, permissions and where they are checked.
@@ -57,12 +57,13 @@ Lead with anything that crosses a tenant boundary. Give the evidence, the conseq
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new endpoints. On an existing endpoint, add each item in its additive form and report the required form as a breaking change that needs a new version and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new endpoints. On an existing endpoint, prefer a compatible migration and report a breaking form as needing a new version and the user's agreement.
 
 - **Tenant context**: resolved once, at the edge, from the credential; carried explicitly into every query, job, cache key and log line; enforced a second time by the data layer (row-level security or a mandatory scope).
 - **Identifiers**: opaque and not guessable. A request for another tenant's resource answers 404, the same as a resource that does not exist.
 - **Permissions**: checked on the server for every operation, against one central policy, with a test per role.
 - **Limits**: per tenant and per key, with a concurrency cap, and a fair queue for background work.
+- **Cells, when blast radius requires them**: one tenant has one authoritative home cell, and that cell belongs to a region. The cell owns compute, database, cache, queues and workers. A small replicated directory stores tenant, home cell and placement epoch; routers pass the epoch and, after cutover, old cells reject or redirect every stale-epoch request, including reads. Move by copy, validate, fence the old placement, atomic epoch cutover, drain and rollback if needed—never unreconciled dual writes. Cached mappings serve only while their placement lease and epoch can be validated; otherwise they fail closed and refresh. Size by workload, skew, admission threshold and failure headroom, and list every dependency that remains shared. Specify regional RPO, RTO and single-writer failover separately.
 - **Provisioning**: SCIM for users and groups; deprovisioning revokes sessions, tokens and keys at once.
 - **Audit log**: an append-only record the customer can read and export.
 

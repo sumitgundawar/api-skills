@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs that send email, SMS, push notifi
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Messaging and notification APIs
 
-A message cannot be unsent. Every bug in a messaging API is visible to a customer, and some of them cost money per message. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the domain rules below.
+A message cannot be unsent. Every bug in a messaging API is visible to a customer, and some of them cost money per message. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the domain rules below.
 
 ## Ground rules
 
@@ -56,11 +56,11 @@ Lead with anything that can send to the wrong people, send twice at scale, break
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new endpoints. On an existing endpoint, add each item in its additive form and report the required form as a breaking change that needs a new version and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new endpoints. On an existing endpoint, prefer a compatible migration and report a breaking form as needing a new version and the user's agreement.
 
-- **Send**: accepts an idempotency key; returns a message resource with a state; checks consent and suppression at send time, not at request time.
+- **Send**: accepts an idempotency key scoped to caller plus operation, stores a request fingerprint, and atomically claims concurrent duplicates. It returns a message resource with a state and checks consent and suppression at send time, not only at request time.
 - **Queues**: separate lanes for security, transactional and bulk, with security first.
-- **Status**: provider callbacks verified, deduplicated and mapped to your own states; exposed by webhook and by read.
+- **Status**: provider callbacks verified and durably inserted into an inbox; mapping to your state and marking the callback processed commit together; duplicates and out-of-order callbacks are safe; exhausted retries have an alert, owner and replay path. Status is exposed by webhook and by read.
 - **Codes**: short-lived, single use, limited per recipient, per source and per destination country.
 - **Bulk**: an asynchronous job with a per-recipient result, a rate the provider accepts, and a stop button.
 - **Unsubscribe**: one step, effective immediately, honoured on every channel it covers.

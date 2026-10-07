@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs for subscriptions, usage metering
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Subscription and billing APIs
 
-A billing bug is the one kind of bug customers audit for you, months later, with interest. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the domain rules below.
+A billing bug is the one kind of bug customers audit for you, months later, with interest. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the domain rules below.
 
 ## Ground rules
 
@@ -57,14 +57,14 @@ Lead with anything that can charge a wrong amount or lose usage. Give the eviden
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new endpoints. On an existing endpoint, add each item in its additive form and report the required form as a breaking change that needs a new version and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new endpoints. On an existing endpoint, prefer a compatible migration and report a breaking form as needing a new version and the user's agreement.
 
-- **Usage events**: each has a unique identifier, a customer, a meter, a quantity and the time it happened; ingestion deduplicates on the identifier; late events have a stated cut-off.
-- **Subscription changes**: explicit operations with an idempotency key and an effective time; a preview endpoint returns the resulting invoice lines before the caller commits.
+- **Usage events**: each has a unique identifier, customer, meter, quantity and event time. Ingestion durably inserts the raw event once; aggregation is reproducible and either commits with the processed marker or can be rebuilt safely. Late events have a stated cut-off.
+- **Subscription changes**: explicit operations with an effective time and an idempotency key scoped to account plus operation. Store a request fingerprint, atomically claim concurrent duplicates and retain the result through the billing retry horizon. A preview endpoint returns the resulting invoice lines before the caller commits.
 - **Prices**: immutable once used. A new price is a new object, and existing subscribers stay on the old one until moved on purpose.
 - **Invoices**: draft, then finalised and immutable; numbered without gaps where the law requires; totals reproducible from stored lines.
 - **Entitlements**: served by one endpoint from one source, with an event when they change.
-- **Webhooks from the provider**: verified, deduplicated, processed in a way that tolerates any order, and reconciled daily.
+- **Webhooks from the provider**: signature and timestamp verified; durably inserted into an inbox before acknowledgement; billing effect and processed marker committed together; processed in a way that tolerates any order; bounded retries with owned replay; reconciled daily.
 
 ## What this skill does not do
 

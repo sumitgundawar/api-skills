@@ -8,8 +8,8 @@ An error response is part of the contract and, for an automated caller, it is th
 - [ ] `type` is a stable identifier that clients can branch on. Never make clients parse `detail`.
 - [ ] `detail` says what was wrong and what to do next, in plain words: which field, which permission, which limit.
 - [ ] Validation errors list every invalid field in one response, with a pointer to each.
-- [ ] Every error says whether retrying can help. Use the status code for the class and a field or header for the specifics.
-- [ ] 429 and 503 include `Retry-After`.
+- [ ] Every error gives the next action: fix the request, obtain authority, retry later with the same idempotency key, or reconcile an unknown outcome. Use the status code for the class and a stable field or header for the specifics.
+- [ ] A 429 means this caller exceeded its allocation. A 503 means the service or a shared dependency is temporarily unavailable or overloaded. Include `Retry-After` only when the server has a credible estimate; never invent precision.
 - [ ] Errors carry a request identifier that also appears in your logs.
 - [ ] Status codes mean what HTTP says they mean. 400 for malformed, 401 for unauthenticated, 403 for forbidden, 404 for not found, 409 for conflict, 410 for gone, 412 for failed precondition, 422 for semantically invalid, 428 for missing precondition, 429 for too many requests, 5xx for your fault.
 - [ ] On a REST API a 200 response never contains an error. Batch endpoints return a per-item status and an overall status that reflects partial failure. (GraphQL is the exception by design. Over `application/json` it answers 200 with an `errors` array. Over `application/graphql-response+json` it answers 4xx when the request could not be executed at all, and 200 with `errors` for failures during execution. Document which you serve, and give each error a stable code in `extensions`.)
@@ -44,11 +44,11 @@ A caller that receives only `{"message":"Something went wrong"}` has nothing to 
 
 ## Retry guidance to publish
 
-- Safe to retry as is: 408, 429, 502, 503, 504, and network failures, provided the request is idempotent or carries an idempotency key. A 425 is retried outside TLS early data.
+- Safe to retry as is: 408, 429, 502, 503, 504, and network failures only when the operation is idempotent or carries an idempotency key whose scope and retention cover the attempt. A timeout means the outcome is unknown: reuse the same key or reconcile; never create a fresh attempt merely because the reply was lost. A 425 is retried outside TLS early data.
 - An error never tells a caller to grant itself more access. It names what is missing and who can grant it.
 - Do not retry: 400, 401, 403, 404, 410, 412, 422, until something changes.
 - 409 has two meanings, so give them distinct problem types. A conflict of state (the order is already cancelled): do not retry. A request with the same idempotency key still executing: retry after a backoff.
-- Always back off with jitter and respect `Retry-After`.
+- Back off with jitter and respect a credible `Retry-After`. Keep retries inside the end-to-end deadline and retry budget.
 
 ## Sources
 

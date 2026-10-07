@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs for online shops and marketplaces
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # E-commerce APIs
 
-In commerce the cost of a mistake is counted in money and in stock that does not exist. Work in the same four phases as any API review: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the domain rules below.
+In commerce the cost of a mistake is counted in money and in stock that does not exist. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the domain rules below.
 
 ## Ground rules
 
@@ -55,7 +55,7 @@ The five questions that find most serious problems:
 2. **Can the last unit be sold twice?** Look for a read of stock followed by a separate write. It must be one atomic operation or a reservation.
 3. **Can a client set its own price?** Look for amounts, discounts or totals accepted from the request body.
 4. **Can a customer see another customer's order?** Read the order handlers and check that each one compares the order's owner with the caller. If there is no test for it, record that as a finding and propose the test in the report. Write it only in Phase 4, after the user agrees, on a branch.
-5. **What happens when a payment webhook arrives twice, late or never?** Look for deduplication on the event identifier and a reconciliation job.
+5. **What happens when a payment webhook arrives twice, late, after a crash or never?** Look for a durable inbox, atomic payment effect plus processed marker, and a reconciliation job.
 
 ## Phase 3: Report
 
@@ -63,15 +63,15 @@ Lead with anything that can lose money, oversell or expose a customer's data. Gi
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new endpoints. On an existing endpoint, add each item in its additive form (accept the key, add a cursor parameter beside the offset) and report the required form as a breaking change that needs a new version and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new endpoints. On an existing endpoint, prefer a compatible migration (accept the key, add a cursor parameter beside the offset) and report a breaking form as needing a new version and the user's agreement.
 
 Default design for the endpoints that matter:
 
-- **Create checkout or order**: accepts an idempotency key, and requires it on new endpoints or in a new version; recalculates every amount on the server; reserves stock with an expiry; returns the fixed totals.
-- **Pay**: passes the payment provider an idempotency key derived from the order and the payment attempt number (for example `order_id:attempt`). Persist the attempt number before calling the provider. A retry of the same attempt reuses the key. Only a definitive decline starts a new attempt with a new key, because some providers replay the first result, including a decline. A timeout never does, or the customer is charged twice. Stores the provider's identifiers. Treats the webhook, not the redirect, as the source of truth.
+- **Create checkout or order**: requires an idempotency key on new endpoints or in a new version. Scope it to tenant or principal plus operation, store a request fingerprint, and claim it atomically so concurrent duplicates cannot both execute. Recalculate every amount on the server, reserve stock with an expiry, and return the fixed totals.
+- **Pay**: durably creates a `PENDING` payment attempt before calling the provider, with a uniqueness boundary, request fingerprint, provider-searchable business reference and provider key derived from the order and attempt number (for example `order_id:attempt`). Return that same stable attempt resource while it is pending or unknown. A retry reuses the key. Only a definitive decline starts a new attempt. After a timeout, retry downstream only if lookup conclusively proves no charge exists and the request is still valid; an inconclusive lookup remains `UNKNOWN` for manual reconciliation. Keep the internal record beyond the client retry and reconciliation horizon even if the provider forgets its key sooner. Treat the webhook or a server-side provider check, not the browser redirect, as the source of truth.
 - **Update order**: optimistic concurrency with a version; state changes are explicit operations (`/cancel`, `/refund`, `/fulfil`) with rules.
 - **Stock**: one atomic conditional decrement, or a reservation table with expiry; never read then write.
-- **Webhooks in**: verify signature on the raw body, store the event identifier, return 2xx fast, process asynchronously, reconcile daily.
+- **Webhooks in**: verify the signature and timestamp on the raw body; durably insert an inbox item before returning 2xx; apply the payment or order effect and mark the event processed in one transaction; bound retries and dead-letter exhausted events with an owner and replay runbook; reconcile daily.
 - **Catalogue reads**: cacheable, cursor paginated, with a cost-based limit and separate, stricter limits for unidentified automation.
 
 For peak events, add a queue or waiting room in front of checkout, shed non-essential calls first (recommendations, analytics), and load test the authenticated checkout path, not only anonymous browsing.

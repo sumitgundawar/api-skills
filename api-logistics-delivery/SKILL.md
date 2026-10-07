@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs for shipping, delivery, fleet, wa
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Logistics and delivery APIs
 
-A logistics API describes things happening in the physical world, reported late, twice and out of order by devices with poor signal. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the domain rules below.
+A logistics API describes things happening in the physical world, reported late, twice and out of order by devices with poor signal. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the domain rules below.
 
 ## Ground rules
 
@@ -56,7 +56,7 @@ Lead with anything that can lose money, lose track of goods or expose where a pe
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new endpoints. On an existing endpoint, add each item in its additive form and report the required form as a breaking change that needs a new version and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new endpoints. On an existing endpoint, prefer a compatible migration and report a breaking form as needing a new version and the user's agreement.
 
 - **Create shipment or label**: accepts an idempotency key and passes a unique reference to the carrier; validates the address first; returns a shipment with a state.
 - **Events in**: each carries the time it happened, the time it was received and a client-generated identifier; stored append only; deduplicated; the current state is derived from them by event time.

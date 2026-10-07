@@ -27,9 +27,9 @@
 
 ## Checkout and payment
 
-- [ ] Creating a checkout or an order requires an idempotency key.
+- [ ] Creating a checkout or order requires an idempotency key scoped to `(tenant or principal, operation, key)`, stores a request fingerprint, and atomically ensures that concurrent duplicates execute once.
 - [ ] Totals, tax and shipping are fixed on the server at checkout and returned to the client.
-- [ ] The payment call carries an idempotency key derived from the order and the attempt number, so a retry of one attempt cannot charge twice, and a second attempt after a decline is not answered with the first decline. (Stripe's v1 API keeps keys for at least 24 hours and replays the first result whether it succeeded or failed.)
+- [ ] A `PENDING` payment attempt is stored before the provider call, with its request fingerprint, provider-searchable business reference, stable provider key and later the provider response identifier. The provider key is derived from order plus attempt. The original request and duplicates return the same stable attempt resource while pending or unknown. A timeout is reconciled; retry downstream only after lookup conclusively proves no charge exists and the request is still valid. An inconclusive lookup remains `UNKNOWN` for manual reconciliation. Internal retention covers the retry and reconciliation horizon even when the provider's key window is shorter. (Stripe's v1 API keeps keys for at least 24 hours and replays the first result whether it succeeded or failed.)
 - [ ] Disputes and chargebacks are modelled as states driven by provider webhooks, not as manual edits.
 - [ ] Rounding is defined once (per line or per order) and applied the same way in every currency.
 - [ ] Authorise and capture are separate where the business needs it.
@@ -49,7 +49,7 @@
 
 ## Webhooks and integrations
 
-- [ ] Incoming webhooks: signature verified on the raw body, event identifier stored, duplicates ignored, 2xx returned quickly, work done asynchronously.
+- [ ] Incoming webhooks: signature and replay timestamp verified on the raw body; raw event durably inserted into an inbox before 2xx; business effect and `PROCESSED` marker committed atomically; duplicates acknowledged; retries bounded; exhausted events alerted, owned and replayable.
 - [ ] Out-of-order events are handled by fetching current state or comparing versions.
 - [ ] A reconciliation job compares your records with the provider's, daily at least.
 - [ ] Outgoing webhooks: signed, retried with backoff, replayable.

@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs for connected devices and the pla
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # IoT and device APIs
 
-A device is a client you cannot patch quickly, that will run its current firmware for years, and that reconnects at the same moment as every other device you sold. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the domain rules below.
+A device is a client you cannot patch quickly, that will run its current firmware for years, and that reconnects at the same moment as every other device you sold. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the domain rules below.
 
 ## Ground rules
 
@@ -57,7 +57,7 @@ Lead with anything that can harm a person, damage devices or let a stranger cont
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. Old firmware cannot be changed, so every change on the device side is additive and the old behaviour stays supported for its stated life.
+Start when the user asks for a change, or after they choose a finding. Old firmware cannot be changed, so new behaviour must preserve the old contract for its stated life and be verified against representative firmware; a schema-additive change is not automatically behaviourally safe.
 
 - **Identity**: a unique credential per device, ideally a key that never leaves it; topics and endpoints authorised per device.
 - **Telemetry**: batched, with a device timestamp and a sequence number; ingestion is idempotent and buffers through a queue.

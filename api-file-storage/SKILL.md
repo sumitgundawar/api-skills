@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs that upload, store, process and s
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # File and storage APIs
 
-A file is the largest and least trusted input an API accepts, and a link to it is the easiest thing to leak. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the rules below.
+A file is the largest and least trusted input an API accepts, and a link to it is the easiest thing to leak. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the rules below.
 
 ## Ground rules
 
@@ -57,7 +57,7 @@ Lead with anything that exposes files or runs hostile content. Give the evidence
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new endpoints. On an existing endpoint, add each item in its additive form and report the required form as a breaking change that needs a new version and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new endpoints. On an existing endpoint, prefer a compatible migration and report a breaking form as needing a new version and the user's agreement.
 
 - **Upload**: the API creates a file resource and returns a short-lived signed request for direct upload, bound to a size limit, a content type and a key the server chose.
 - **Large files**: resumable or multipart, with a checksum per part and an expiry for unfinished uploads.

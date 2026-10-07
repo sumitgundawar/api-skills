@@ -19,7 +19,7 @@
 
 ## Sending webhooks
 
-- [ ] Each delivery is signed with a secret unique to the subscriber. The signature covers the raw body and a timestamp, and receivers are told to reject old timestamps.
+- [ ] Each delivery is signed with a secret unique to the subscriber. The signature covers the stable event identifier, timestamp and raw body together, and receivers are told to reject timestamps outside a documented replay window.
 - [ ] Secrets can be rotated with an overlap period, during which both are valid.
 - [ ] The Standard Webhooks specification is followed, or your own scheme is documented as precisely.
 - [ ] Failed deliveries are retried with exponential backoff and jitter over a stated period (hours to days), not immediately and not for ever.
@@ -35,10 +35,13 @@
 ## Receiving webhooks
 
 - [ ] The signature is verified against the raw request body, before parsing, with a constant-time comparison.
-- [ ] The timestamp is checked, to limit replay.
-- [ ] The event identifier is stored with a unique constraint, and a duplicate is acknowledged and ignored.
-- [ ] The handler answers 2xx as soon as the event is stored, and does the work asynchronously.
-- [ ] Order is not assumed. The handler fetches current state or compares versions.
+- [ ] The signed delivery timestamp is checked against a documented replay window. It is distinct from event occurrence time, and the window permits legitimate retry and operator replay.
+- [ ] The raw event and a payload fingerprint are durably inserted into an inbox under a unique event identifier before 2xx. A duplicate with the same fingerprint is acknowledged; the same identifier with a different fingerprint is rejected and alerted as an integrity error.
+- [ ] The asynchronous worker applies the business effect and marks the inbox item `PROCESSED` in one local transaction. A deduplication record cannot commit by itself and hide a lost effect.
+- [ ] If an effect cannot share the inbox transaction, including another datastore or external system, the same transaction writes an outbox command. Delivery happens afterwards with a stable idempotency key, `UNKNOWN` state and reconciliation path.
+- [ ] The inbox has explicit `RECEIVED`, `PROCESSING`, `PROCESSED` and dead-letter states or equivalent. Work is claimed with a lease so a stale attempt can be recovered.
+- [ ] Processing retries are bounded. Exhausted items raise an alert, have a named owner and use a tested replay runbook.
+- [ ] Order is not assumed. The handler fetches current state or compares a resource version or per-aggregate sequence.
 - [ ] Unknown event types and unknown fields are ignored, not rejected.
 - [ ] A reconciliation job catches events that never arrived.
 - [ ] The receiving endpoint is rate limited and size limited, and reveals nothing in its error responses.
@@ -56,7 +59,7 @@
 ## Schema evolution
 
 - [ ] Schemas are registered and checked for compatibility in CI.
-- [ ] Changes are additive: new optional fields, new event types. Consumers ignore what they do not know.
+- [ ] New optional fields and event types are treated as compatibility candidates, not automatically safe. Consumers have a tolerant-reader policy, and representative consumers are tested before release.
 - [ ] A breaking change is a new event type or a new major version, published alongside the old one, with a retirement date.
 - [ ] New enum values are announced, because they break strict consumers.
 - [ ] Field meanings do not change under the same name.

@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs that sign users in and issue toke
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Identity and sign-in APIs
 
-Every other API trusts this one. A flaw here is a flaw in everything behind it. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the rules below.
+Every other API trusts this one. A flaw here is a flaw in everything behind it. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the rules below.
 
 ## Ground rules
 
@@ -57,9 +57,9 @@ Lead with anything that allows account takeover or token forgery. Give the evide
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. Changes here can lock users out, so each one has a rollout plan and a way back.
+Start when the user asks for a change, or after they choose a finding. Changes here can lock users out, so each one has a rollout plan and a way back.
 
-- **Flows**: authorisation code with PKCE for every client. No implicit flow. No password grant. On an existing server, measure which clients use each flow first, then retire it with notice. Switching a flow off breaks live clients.
+- **Flows**: OpenID Connect authorisation code with PKCE when an interactive client needs sign-in, and OAuth authorisation code with PKCE for delegated API access; device authorisation for input-constrained devices; client credentials, workload identity or signed assertions for service-to-service clients. No implicit flow and no resource owner password grant. On an existing server, measure which clients use each flow first, then retire it with notice. Switching a flow off breaks live clients.
 - **Protocol endpoints**: OAuth and OpenID Connect endpoints keep the error format the specifications define (`{"error": "invalid_request"}` and so on). Do not convert them to another format.
 - **Tokens**: short-lived access tokens with a narrow audience and scope; refresh tokens rotated on use, with reuse detection, and sender-constrained where possible.
 - **Validation**: one library, used by every resource server, that checks signature, an allowlist of algorithms, issuer, audience and time.

@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs for reporting, analytics, data ex
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Data and analytics APIs
 
-A data API answers questions whose cost the caller chooses. One request can be a single row or a table scan, and the response can be a number or ten gigabytes. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the rules below.
+A data API answers questions whose cost the caller chooses. One request can be a single row or a table scan, and the response can be a number or ten gigabytes. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the rules below.
 
 ## Ground rules
 
@@ -57,7 +57,7 @@ Lead with anything that leaks rows, lets one query starve the system or corrupts
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new endpoints. On an existing endpoint, add each item in its additive form and report the required form as a breaking change that needs a new version and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new endpoints. On an existing endpoint, prefer a compatible migration and report a breaking form as needing a new version and the user's agreement.
 
 - **Small queries**: synchronous, with a required time range, a row cap, a timeout and cursor pagination.
 - **Large queries and exports**: a job resource with a state, progress, cancellation and an expiry; results as files behind short-lived signed links.

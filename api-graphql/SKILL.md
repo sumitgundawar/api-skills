@@ -4,12 +4,12 @@ description: Reviews, designs and changes GraphQL APIs. Covers schema design, nu
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # GraphQL APIs
 
-GraphQL hands the caller a query language. Every question about cost, access and change that a REST API answers per endpoint, a GraphQL API has to answer per field. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for the general decisions and use this skill for what GraphQL changes.
+GraphQL hands the caller a query language. Every question about cost, access and change that a REST API answers per endpoint, a GraphQL API has to answer per field. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general decisions, then this skill for what GraphQL changes.
 
 ## Ground rules
 
@@ -55,7 +55,7 @@ Lead with anything that leaks data through the graph or lets one query take the 
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. Additive changes are safe. Everything else needs usage data and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. An additive schema change is only a compatibility candidate: check strict clients, nullability, resolver cost, defaults and representative operations. Removals or behavioural changes need usage data, a migration plan and the user's agreement.
 
 - **Lists**: connection-style pagination with a required, capped page size.
 - **Cost**: a calculated cost per query, a limit per caller, and the cost returned in the response.

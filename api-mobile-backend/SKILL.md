@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs that serve mobile and other insta
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Mobile backend APIs
 
-An installed app is a client you shipped once and cannot take back. Some people will run this year's build for five years, on a train, in a tunnel. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the rules below.
+An installed app is a client you shipped once and cannot take back. Some people will run this year's build for five years, on a train, in a tunnel. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the rules below.
 
 ## Ground rules
 
@@ -56,7 +56,7 @@ Lead with anything that breaks installed apps or trusts the client. Give the evi
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. Every change is additive unless usage data shows no installed version depends on the old form.
+Start when the user asks for a change, or after they choose a finding. Preserve the old contract unless usage data and representative-version tests prove no supported app depends on it. A schema-additive change is not automatically behaviourally safe.
 
 - **Version signal**: every request carries app, version, platform and build. The server logs them and can answer by version.
 - **Writes**: an idempotency key generated on the device and kept across retries and app restarts.

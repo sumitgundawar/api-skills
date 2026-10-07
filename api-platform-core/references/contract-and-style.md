@@ -25,7 +25,7 @@ Treat all of these as breaking, even when they look harmless (Google AIP-180):
 
 One more, by Hyrum's Law rather than by AIP-180: adding a new enum value to a response. AIP-180 treats it as compatible, with a warning that clients may not handle it. In practice a client with an exhaustive switch breaks. It is safe only if the contract has always told clients to expect unknown values. Check how your breaking-change detector classifies this case. Some report it as a warning that does not fail the build.
 
-Additive and safe: a new endpoint, a new optional request field, a new response field, a new event type, a new optional header.
+Usually additive and therefore safer, but not automatically safe: a new endpoint, optional request field, response field, event type or optional header. Strict decoders may reject unknown fields, exhaustive switches may reject new enum values, and a new default or side effect can change behaviour without changing the schema. Run the contract diff, test representative real clients, and release risky changes to a small monitored slice with predefined rollback criteria.
 
 ## How to choose a protocol
 

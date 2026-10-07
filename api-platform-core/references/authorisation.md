@@ -2,6 +2,8 @@
 
 Authorisation answers "may this caller do this, to this object". It is where most serious API vulnerabilities live. Three of the OWASP API Security Top 10 (2023) entries are authorisation failures: object level (API1), object property level (API3) and function level (API5).
 
+Keep four questions separate. Authentication establishes the principal. A role, scope or policy may permit an action. Tenant membership limits the data boundary. Ownership or another relationship decides whether this principal may act on this exact object. A route-level role check never replaces the tenant and object checks; all applicable checks must pass.
+
 ## Checklist
 
 - [ ] Every handler that takes an object identifier checks that the caller may access that specific object. Not just that the caller is logged in.
@@ -12,7 +14,7 @@ Authorisation answers "may this caller do this, to this object". It is where mos
 - [ ] Denied access to an object the caller should not know about returns 404, not 403, to avoid confirming that it exists. Be consistent.
 - [ ] List endpoints are scoped by the caller's permissions in the query, not filtered afterwards in memory.
 - [ ] Authorisation decisions are logged with the caller, the object, the action and the result.
-- [ ] There are tests that try to read and write another tenant's object and expect failure.
+- [ ] Tests distinguish a missing role or scope from cross-tenant access and wrong-object access. Each path is denied independently.
 
 ## Models
 

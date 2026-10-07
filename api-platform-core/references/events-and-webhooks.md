@@ -26,10 +26,15 @@ Use events when consumers need to know that something happened without polling. 
 ## Checklist for receiving
 
 - [ ] Verify the signature against the raw body before parsing.
-- [ ] Return 2xx quickly and do the work asynchronously.
-- [ ] Store the event identifier and ignore repeats.
-- [ ] Do not assume order. Fetch current state when it matters.
+- [ ] Check the signed delivery timestamp against a documented replay window before accepting the event. Keep it distinct from the event's occurrence time, and make the window compatible with legitimate provider retries and operator-initiated replay.
+- [ ] Durably insert the raw event and its payload fingerprint into an inbox with a unique event identifier before returning 2xx. A duplicate with the same fingerprint is acknowledged; the same identifier with a different fingerprint is rejected and alerted as an integrity error.
+- [ ] A worker applies the business effect and marks the inbox item processed in the same local transaction. A crash can cause another attempt, but can never leave a "processed" marker without the effect.
+- [ ] If any effect cannot share the inbox transaction, including a write to another datastore or an external call, that transaction writes an outbox command instead. Deliver the command afterwards with its own stable idempotency key, `UNKNOWN` state and reconciliation path.
+- [ ] Stale `PROCESSING` records are reclaimed with a lease. Retries are bounded; exhausted records go to a dead-letter state with an alert, an owner and a tested replay runbook.
+- [ ] Do not assume order. Fetch current state or compare a resource version or per-aggregate sequence when order matters.
 - [ ] Reconcile periodically by listing, in case an event never arrived.
+
+The fast acknowledgement boundary is durable storage, not completed business work. If storing the inbox item and applying the effect happen in different transactions, keep distinct `RECEIVED`, `PROCESSING` and `PROCESSED` states. The atomic invariant is between the business effect and the transition to `PROCESSED`.
 
 ## Beyond webhooks
 

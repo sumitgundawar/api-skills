@@ -46,7 +46,7 @@
 
 ## OAuth and OpenID Connect
 
-- [ ] The authorisation code flow with PKCE is used for every client type. The implicit flow and the resource owner password grant are off. This is the direction of RFC 9700 and the OAuth 2.1 draft.
+- [ ] Interactive clients use OpenID Connect authorisation code flow with PKCE when they need sign-in, and OAuth authorisation code with PKCE for delegated API access. Input-constrained devices use the device authorisation grant. Machine clients use workload identity, client credentials, mutual TLS or signed assertions. The implicit flow and resource owner password grant are off, following RFC 9700.
 - [ ] Redirect addresses are matched exactly against registered values.
 - [ ] `state` or PKCE protects against cross-site request forgery, and `nonce` binds an ID token to the request.
 - [ ] Authorisation codes are single use and live for seconds to a minute.
@@ -54,7 +54,7 @@
 - [ ] Native apps use the system browser, not an embedded web view (RFC 8252).
 - [ ] The server publishes its metadata (RFC 8414, or OpenID Connect discovery), and returns the issuer in authorisation responses (RFC 9207) to prevent mix-up attacks.
 - [ ] Consent screens name the client and the scopes plainly, and users can review and revoke grants.
-- [ ] Input-constrained devices use the device authorisation grant (RFC 8628), with protection against a phished user code.
+- [ ] Input-constrained devices that cannot use an ordinary browser redirect use the device authorisation grant (RFC 8628), with protection against a phished user code.
 - [ ] High-value clients send authorisation parameters by pushed authorisation request (RFC 9126), so they cannot be altered in the browser.
 - [ ] A resource server that needs a stronger or fresher sign-in says so with the step-up challenge (RFC 9470), and the client can act on it.
 - [ ] Linking a social or enterprise login to an existing account requires a verified email from that provider, or a sign-in to the existing account first. An unverified email must not take over an account.

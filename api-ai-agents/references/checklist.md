@@ -12,6 +12,7 @@ Facts and versions were checked in October 2026. Protocols in this area move qui
 - [ ] For a large API, tools are loaded on demand or replaced by search plus execute. Cloudflare reported about 1.17 million tokens to describe 2,500 or more endpoints as tools, against about 1,000 tokens with two tools. Anthropic reported 150,000 tokens reduced to 2,000 in one example.
 - [ ] Tool definitions and behaviour are versioned, and changes follow the same compatibility rules as any API.
 - [ ] There is an evaluation set of realistic tasks, and tool changes are measured against it.
+- [ ] A repeat-sensitive tool scopes its idempotency key to principal plus operation, stores a request fingerprint, claims concurrent duplicates atomically and retains the result for the full retry horizon.
 
 ## MCP servers
 
@@ -29,6 +30,9 @@ Facts and versions were checked in October 2026. Protocols in this area move qui
 
 - [ ] Each agent has its own identity. A person and an agent never share a key.
 - [ ] Tokens are short-lived, narrowly scoped to the task, and name both the person and the agent.
+- [ ] Discovery and description are not authority: RFC 9727 can locate an API and OpenAPI can describe it, but OAuth scopes and independent policy authorise actions and duration.
+- [ ] The resource service still enforces tenant, permitted action and exact-object ownership or relationship on every call.
+- [ ] An agent may request more authority but cannot approve it for itself. The approver, granted scope, expiry and revocation path are recorded outside the model.
 - [ ] Consent screens tell the person which agent is asking and for what.
 - [ ] High-impact actions require a fresh, explicit approval from a person, delivered out of band from the model.
 - [ ] Every action is logged with the agent, the person, the tool, the arguments and the result.
@@ -48,7 +52,7 @@ Facts and versions were checked in October 2026. Protocols in this area move qui
 ## Limits, cost and budgets
 
 - [ ] Limits are expressed in the unit that reflects cost. For model APIs that is tokens a minute, input and output counted separately, alongside requests a minute.
-- [ ] Responses report remaining quota. 429 and overload responses include `Retry-After`.
+- [ ] Responses report remaining quota. A caller-specific limit uses 429; service overload uses 503. Include `Retry-After` only when the estimate is credible.
 - [ ] Overload (the service is saturated) is distinguished from rate limiting (this caller sent too much), so clients back off correctly.
 - [ ] Each task has a budget for steps, tokens, wall-clock time and money, enforced in code outside the model.
 - [ ] When several agents share one quota, a coordinator or a shared limiter prevents them from retrying in step.

@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs for social and community platform
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Social media APIs
 
-A social platform's API serves reads at enormous fan-out, holds content that people regret and want removed, and is the main target of scrapers and automation. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the domain rules below.
+A social platform's API serves reads at enormous fan-out, holds content that people regret and want removed, and is the main target of scrapers and automation. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the domain rules below.
 
 ## Ground rules
 
@@ -62,7 +62,7 @@ Lead with anything that exposes private content, defeats a block, or fails to de
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new endpoints. On an existing endpoint, add each item in its additive form (accept the key, add a cursor parameter beside the offset) and report the required form as a breaking change that needs a new version and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new endpoints. On an existing endpoint, prefer a compatible migration (accept the key, add a cursor parameter beside the offset) and report a breaking form as needing a new version and the user's agreement.
 
 Default design for the endpoints that matter:
 

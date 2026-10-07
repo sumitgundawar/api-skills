@@ -2,7 +2,7 @@
 
 ## Send
 
-- [ ] Send accepts an idempotency key, scoped to the caller. A repeat returns the first message.
+- [ ] Send accepts an idempotency key scoped to caller plus operation, stores a request fingerprint, atomically claims concurrent duplicates and retains the result through the delivery reconciliation horizon. A repeat returns the same message resource.
 - [ ] The response is a message resource with an identifier and a state (accepted, queued, sent, delivered, failed), not a bare success.
 - [ ] The provider call carries your identifier, so a provider-side duplicate can be detected.
 - [ ] A provider timeout leaves the message in an unknown state that a status check resolves. It is not blindly resent.
@@ -29,7 +29,7 @@
 
 ## Delivery status
 
-- [ ] Provider callbacks are verified by signature, deduplicated on the provider's event identifier, and accepted out of order.
+- [ ] Provider callbacks are verified by signature and replay timestamp, then durably inserted into an inbox under the provider event identifier. Updating message state and marking the callback processed commit together; duplicates and out-of-order callbacks are safe; retries are bounded; exhausted callbacks are alerted, owned and replayable.
 - [ ] Hard bounces and complaints add the address to suppression automatically.
 - [ ] Invalid push tokens are removed when the push service reports them.
 - [ ] Status is offered by webhook, signed and replayable, and by a read endpoint.

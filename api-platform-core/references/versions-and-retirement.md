@@ -5,7 +5,7 @@ You will need to change something that people depend on. Decide how before you n
 ## Checklist
 
 - [ ] There is a written, public versioning policy: how versions are named, how long each is supported, and how much notice a removal gets.
-- [ ] Additive changes ship continuously and never need a new version.
+- [ ] Changes that are additive in the schema normally ship in the current version only after tolerant-reader rules, representative client tests and behavioural compatibility show they are safe. "Additive" is not proof.
 - [ ] Breaking changes ship only in a new version, on a predictable schedule.
 - [ ] Each consumer is pinned to a version and stays on it until they choose to move.
 - [ ] You can answer "who still uses version X, and how much" per consumer. If you cannot, fix that first.
@@ -19,9 +19,9 @@ You will need to change something that people depend on. Decide how before you n
 - A major number in the path (`/v1`, `/v2`) suits a complete redesign, not routine evolution.
 - GraphQL usually evolves one schema continuously and marks fields `@deprecated`.
 
-## How Stripe keeps old versions cheap
+## A published Stripe architecture
 
-The core logic only ever produces the newest version. Each breaking change is written as a small module that converts the new response shape back to the previous one. A response for an older version is produced by applying those modules in reverse order. Most of the cost of an old version sits in those modules. It is not free: changes with side effects leak into the core, each feature is tested against every pinned version, and typed SDKs are tied to one version. Since 2024, monthly releases contain only additive changes, and breaking changes are confined to two named major releases a year.
+Stripe described this architecture in 2017; treat it as a useful historical pattern, not a claim about every current endpoint. The core logic produces the newest version. Each breaking change is a small module that converts the new response shape back to the previous one. A response for an older version applies those modules in reverse order. Most of the cost of an old version sits in those modules. It is not free: changes with side effects leak into the core, each feature is tested against every pinned version, and typed SDKs are tied to one version. Since 2024, Stripe's published release process has confined breaking changes to named major releases while more frequent releases contain compatible changes.
 
 ## Published support windows (read October 2026)
 
@@ -51,7 +51,7 @@ Pick a number, publish it, and keep it.
    Link: <https://api.example.com/docs/migrate-orders-v2>; rel="deprecation"
    ```
 
-4. **Brown out.** Schedule short, announced outages of the old version before the final date, so that callers who ignored the notices find out while you are watching. GitHub does this routinely. During a brownout send `Cache-Control: no-store` and state the end time in the body. A bare 410 can be cached and is read as permanent.
+4. **Exercise compatibility.** When disruption is justified, use an announced, reversible test on a small controlled slice of old-version traffic while owners are watching. Define success and stop criteria, provide a kill switch, monitor impact and roll back immediately when the threshold is crossed. If the exercise returns a temporary error, send `Cache-Control: no-store` and state when normal service resumes. A blanket outage is not the default.
 5. **Remove.** Answer 410 Gone with a problem-details body that links to the guide. Keep the 410 for a long time.
 6. **Review.** Record who broke and why, and improve step 1 for next time.
 

@@ -38,15 +38,19 @@
 - [ ] Rate limits and concurrency caps are per tenant and per key. Limits scale with the plan.
 - [ ] Background work is queued fairly, so one tenant's bulk import cannot starve the rest.
 - [ ] Expensive operations (exports, reports, search) have cost-based limits and run asynchronously.
-- [ ] Large tenants can be placed in their own cell or partition without an API change.
-- [ ] Per-tenant usage, latency and error rates are observable.
+- [ ] When cells are used, each is a full failure boundary with its own compute, database, cache, queues and workers, not merely a data shard. A tenant has one authoritative home cell; the cell belongs to a region.
+- [ ] A small replicated placement directory stores `{tenant, home_cell, placement_epoch}`. Directory writes and moves are strongly consistent. Routers forward the epoch; after cutover, old cells reject or redirect every stale-epoch request, including reads. Cached mappings serve an unchanged placement only while their lease and epoch can be validated; expired or unverifiable mappings fail closed and refresh from the directory. New placements or moves fail closed when the directory cannot be updated.
+- [ ] A move has an explicit copy, validate, fence the old placement, atomic epoch cutover, drain and rollback state machine. There are no unreconciled dual writes.
+- [ ] Cells are sized and rebalanced by workload, skew, admission thresholds and failure headroom rather than equal tenant counts. Cross-cell operations and fan-out are explicit. Shared identity, payment, control-plane and other dependencies are enumerated and tested.
+- [ ] Regional disaster recovery is separate from cell routing: replication or backup strategy, RPO, RTO, single-writer fencing and operator-versus-automatic failover are documented. A failed home cell does not silently route writes to another region.
+- [ ] Per-tenant usage, latency and error rates are available through logs, traces or a usage pipeline. Raw tenant identifiers appear on metrics only when the active set is deliberately bounded and monitored.
 
 ## Audit and data
 
 - [ ] An audit log records who did what, to what, when, from where, for every administrative and security-relevant action.
 - [ ] The customer can read, filter and export it, and it cannot be edited.
 - [ ] A tenant can export all of its data in a documented format.
-- [ ] Tenant deletion is a pipeline with a grace period, and it reaches backups, search indexes, caches and analytics copies.
+- [ ] Tenant deletion is a pipeline with a grace period. It removes live, search, cache and analytics copies; writes a deletion tombstone honoured on restore; and lets backups expire on a documented schedule. Legal holds and downstream copies are explicit. Crypto-erasure is claimed only when every relevant per-tenant key copy can actually be destroyed, and restore tests prove deleted data does not return.
 - [ ] Data residency, where promised, is enforced by where the tenant's data and its processing live, including logs and support tooling.
 
 ## Plans and entitlements
@@ -67,4 +71,7 @@
 - OASIS SAML 2.0; OpenID Connect Core.
 - OWASP API Security Top 10 (2023); OWASP Multi-Tenant Security Cheat Sheet.
 - AWS Well-Architected, SaaS Lens.
+- AWS Well-Architected, Reducing the Scope of Impact with Cell-Based Architecture.
+- NIST SP 800-88 Rev. 2, Guidelines for Media Sanitization: https://csrc.nist.gov/pubs/sp/800/88/r2/final
+- UK Information Commissioner's Office, Right to erasure (backup systems): https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-erasure/
 - PostgreSQL documentation, Row Security Policies.

@@ -4,6 +4,8 @@ A growing share of callers are AI agents acting for a person or a business. They
 
 Status note: several items below rest on drafts or young standards. Each is marked. Adopt the stable ones first.
 
+Keep discovery, description, authorisation and enforcement separate. RFC 9727 helps a caller discover an API. OpenAPI describes its operations and schemas. OAuth scopes plus policy can authorise an action for a limited time. The resource service must still enforce tenant, role or action and exact-object access. A catalogue or schema grants no authority.
+
 ## Checklist, in five layers
 
 ### Discover
@@ -25,6 +27,7 @@ Status note: several items below rest on drafts or young standards. Each is mark
 
 - [ ] OAuth protected-resource metadata is published (RFC 9728, stable).
 - [ ] Tokens for agents are short-lived, narrowly scoped, and name both the person and the agent.
+- [ ] A machine caller can request more authority but cannot grant it to itself. Approval records the approver, scope, expiry and revocation path outside the model.
 - [ ] A program can obtain sandbox credentials without a person filling in a form.
 - [ ] Signed bot requests are verified where your edge supports it (Web Bot Auth, published as an IETF working group draft on 1 September 2026; not an RFC).
 

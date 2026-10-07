@@ -11,7 +11,7 @@
 
 ## Transfers and payments
 
-- [ ] Creating a payment accepts an idempotency key, scoped to the customer. The same key with a different body is rejected.
+- [ ] Creating a payment accepts an idempotency key scoped to `(customer, operation, key)`, stores a request fingerprint, and atomically ensures concurrent duplicates execute once. The same key with a different request is rejected.
 - [ ] A payment is a resource with a state machine. The API never answers only "ok".
 - [ ] Limits (per transaction, per day, per counterparty) are enforced on the server inside the transaction.
 - [ ] Concurrent debits cannot overdraw: a conditional update, a row lock or a serialisable transaction.
@@ -23,7 +23,7 @@
 ## Reconciliation
 
 - [ ] A job compares your records with each provider's reports at least daily and raises every difference.
-- [ ] Incoming webhooks and files are deduplicated on the provider's identifier and tolerate arriving late or out of order.
+- [ ] Incoming webhooks and files are durably inserted into an inbox under the provider identifier. Applying the ledger or payment effect and marking the inbox item processed happen in one transaction; duplicates are acknowledged, ordering is not assumed, retries are bounded, and exhausted items are alerted, owned and replayable.
 - [ ] There is an operational view of payments stuck in a non-final state, with an age.
 
 ## Access and consent

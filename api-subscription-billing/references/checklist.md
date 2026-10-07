@@ -11,7 +11,7 @@
 ## Subscription lifecycle
 
 - [ ] The state machine is written down, and each transition is an explicit operation.
-- [ ] Create, upgrade, downgrade, pause and cancel accept an idempotency key.
+- [ ] Create, upgrade, downgrade, pause and cancel accept an idempotency key scoped to account plus operation, store a request fingerprint, atomically claim concurrent duplicates and retain the result through the billing retry horizon.
 - [ ] Changes carry an effective time: now, at period end, or a date. Scheduled changes are visible and cancellable.
 - [ ] A preview endpoint returns the exact invoice lines a change would produce.
 - [ ] Proration follows one written rule, with tests for month ends, leap years, daylight saving changes and two changes in one period.
@@ -21,7 +21,7 @@
 
 ## Usage metering
 
-- [ ] Every usage event has a unique identifier, and ingestion is idempotent on it.
+- [ ] Every usage event has a unique identifier. Ingestion durably inserts each raw event once; applying its aggregate effect and marking it processed are atomic, or aggregates are rebuilt reproducibly from the raw log.
 - [ ] Events carry the time they happened, separate from the time they were received.
 - [ ] The sender persists an event before sending it, and retries until it is acknowledged.
 - [ ] Late events have a rule: accepted until the period's invoice is finalised, then billed in the next period or dropped, as documented.
@@ -42,7 +42,7 @@
 
 ## Payment collection
 
-- [ ] Charging an invoice carries an idempotency key derived from the invoice and the attempt.
+- [ ] Charging an invoice stores a `PENDING` attempt and provider-searchable business reference before the call, then carries a stable provider key derived from invoice plus attempt. The original request and duplicates return the same attempt resource. A timeout remains unknown; retry downstream only if lookup conclusively proves absence and the request is still valid. An inconclusive lookup stays unknown for manual reconciliation.
 - [ ] Failed payments follow a retry schedule with customer messages. The subscription moves to past due, and access follows a stated grace rule.
 - [ ] Authentication steps required by the bank (3-D Secure) are states, not errors.
 - [ ] Payment method updates take effect on the open invoice.
@@ -50,7 +50,7 @@
 - [ ] A provider timeout while charging leaves the invoice in a "payment unknown" state that a status check or webhook resolves. It is neither marked paid nor charged again.
 - [ ] A customer's billing currency is fixed. Changing it is an explicit migration, not a field update.
 - [ ] Billing provider keys and webhook secrets never appear in code, logs or the agent's own output.
-- [ ] Provider webhooks are verified, deduplicated and tolerant of order. A daily job reconciles subscriptions, invoices and payments with the provider.
+- [ ] Provider webhooks are verified against the raw body and replay window, then durably inserted into an inbox before acknowledgement. The billing effect and processed marker commit together; order is not assumed; retries are bounded; exhausted events are alerted, owned and replayable. A daily job reconciles subscriptions, invoices and payments with the provider.
 
 ## Entitlements
 

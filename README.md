@@ -48,7 +48,9 @@ Shared services:
 
 Start with `api-platform-core` and add the ones that match your product. Several can be installed together.
 
-Every skill works the same way: **Inventory**, **Assess**, **Report**, **Change**. It reads the project, scores it against a checklist with evidence, reports, and changes code only when asked. It is written never to break a contract silently.
+The skills choose the smallest workflow that fits the request. A review uses **Inventory → Assess → Report**. A design task starts from constraints and produces a contract plus trade-offs. An implementation request inspects the affected contract, code, tests and callers, then makes and verifies the scoped change. An explanation answers directly. They never change code unless asked, and never break a contract silently.
+
+Use `api-platform-core` for cross-cutting HTTP behaviour, then add a specialist only when its domain is central to the task. `api-webhooks-events` owns event delivery, `api-identity-provider` owns building an identity or authorisation server, and `api-ai-agents` owns agent-specific tools, delegation and inference. A protected API that merely uses OAuth still starts with the core skill.
 
 ## Install
 
@@ -83,7 +85,7 @@ These are a starting point. Your organisation has its own rules, names and limit
 
 ## Sources and dates
 
-Every reference file lists its sources. Facts, versions and draft statuses in the first five skills (core, e-commerce, e-learning, social media, AI agents) were checked between 1 and 4 October 2026. The other seventeen were written on 4 October 2026 from the standards they cite and have had one independent review. Check a cited standard yourself before you rely on a detail. Several of the agent-related standards are drafts and will change. Each file says which.
+Every reference file lists its sources. The core, e-commerce, fintech, multi-tenant SaaS, subscription billing, messaging, webhook/event, identity, GraphQL, gRPC and AI-agent guidance was reviewed against the final JAX London material on 7 October 2026. The remaining skills were checked between 1 and 4 October 2026 from the standards they cite and have had an independent review. Check a cited standard yourself before you rely on a detail. Several agent-related standards are drafts and will change; each file says which.
 
 ## Licence
 

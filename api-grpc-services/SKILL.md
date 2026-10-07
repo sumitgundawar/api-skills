@@ -4,12 +4,12 @@ description: Reviews, designs and changes gRPC and Protocol Buffers APIs, and se
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # gRPC and internal service APIs
 
-Internal APIs fail differently from public ones. The callers are few and known, but they are chained, and a slow service at the bottom takes down everything above it. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for the general decisions and use this skill for what gRPC and service chains change.
+Internal APIs fail differently from public ones. The callers are few and known, but they are chained, and a slow service at the bottom takes down everything above it. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general decisions, then this skill for what gRPC and service chains change.
 
 ## Ground rules
 
@@ -56,11 +56,11 @@ Lead with anything that can corrupt data on the wire or turn one slow service in
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. Additive proto changes are safe. Everything else needs the user's agreement and a rollout order.
+Start when the user asks for a change, or after they choose a finding. An additive Protobuf change may be wire-compatible without being behaviourally compatible; prove both with a breaking-change check, representative clients and a rollout order. Incompatible changes need the user's agreement and a migration plan.
 
 - **Proto changes**: add fields with new numbers; reserve the numbers and names of anything removed; run a breaking-change check in CI.
 - **Deadlines**: set at the edge, propagated on every call, and checked before starting expensive work.
-- **Retries**: at one layer, with a budget, only for methods marked safe to repeat or carrying a request identifier.
+- **Retries**: explicit ownership, preferably one layer on a synchronous path, with one end-to-end budget; only for methods marked safe to repeat or carrying a request identifier.
 - **Errors**: the standard status codes used as defined, with structured details.
 - **Mutating methods**: a request identifier field so a repeat is recognised.
 - **Rollout**: servers that accept the new form first, then clients that send it.

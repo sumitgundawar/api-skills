@@ -4,12 +4,12 @@ description: Reviews, designs and changes event-driven APIs. Covers sending webh
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Webhook and event APIs
 
-An event API makes three promises that are easy to say and hard to keep: nothing is lost, duplicates are harmless, and order does not matter or is stated. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the rules below.
+An event API makes three promises that are easy to say and hard to keep: nothing is lost, duplicates are harmless, and order does not matter or is stated. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for the rules below.
 
 ## Ground rules
 
@@ -46,7 +46,7 @@ The five questions that find most serious problems:
 
 1. **Can a change commit without its event, or an event go out for a change that rolled back?** Look for a database write followed by a separate publish.
 2. **Can a receiver tell a forged event from a real one?** Look for a signature over the raw body with a timestamp.
-3. **What does a consumer do with the same event twice?** Look for deduplication on the event identifier.
+3. **What does a consumer do with the same event twice or after a crash?** Look for a durable inbox and one transaction that applies the business effect and marks the event processed.
 4. **Can a subscriber's address make your servers call your own network?** Look at how subscriber URLs are validated.
 5. **What happens to an event that keeps failing?** Look for retries without end, or events dropped with no record.
 
@@ -56,12 +56,12 @@ Lead with anything that can lose an event, accept a forged one or reach an inter
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. A new event type and a new optional field are additive. Anything else needs a new version of the event and the user's agreement.
+Start when the user asks for a change, or after they choose a finding. A new event type or optional field is a usually compatible candidate, not a guarantee: check strict decoders, unknown-event handling and representative consumers. A breaking change needs a new event version and the user's agreement.
 
 - **Emit**: write the event to an outbox table in the same transaction as the change, and publish from the outbox.
 - **Envelope**: a unique identifier, a type, a schema version, the time it happened, the subject, and the data.
 - **Send**: signed with a per-subscriber secret and a timestamp; retried with exponential backoff and jitter for a stated period; then parked and visible.
-- **Receive**: verify on the raw body, store the identifier, answer 2xx quickly, process afterwards, and treat order as unreliable.
+- **Receive**: verify the signature and replay timestamp on the raw body; durably insert an inbox item before answering 2xx; then apply the business effect and mark the item processed in one local transaction. Reclaim stale work, bound retries, and park exhausted events with an alert, owner and replay runbook. Treat order as unreliable.
 - **Replay**: an endpoint to list and resend events, so a subscriber can recover without asking.
 - **Describe**: publish the event catalogue with schemas and examples.
 

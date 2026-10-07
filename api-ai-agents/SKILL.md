@@ -4,12 +4,12 @@ description: Reviews, designs and changes APIs that are built for, or consumed b
 license: MIT
 metadata:
   author: Sumit Gundawar
-  version: "1.0"
+  version: "1.1"
 ---
 
 # APIs for AI agents
 
-An agent is a caller that retries without tiring, runs many calls in parallel, pays for every token it reads, and does exactly what your responses tell it. Work in four phases: Inventory, Assess, Report, Change. If the `api-platform-core` skill is installed, use it for general HTTP behaviour and use this skill for the domain rules below.
+A machine caller, including an AI agent, can retry without tiring, run many calls in parallel, pay for every token it reads, and act on exactly what your responses tell it. Use Inventory → Assess → Report for a review. For a direct design, change or explanation, use only the relevant phases; the request already authorises its scoped work. If the `api-platform-core` skill is installed, use its workflow and general HTTP guidance, then this skill for agent-specific tools, delegation, inference and budgets.
 
 Status note: this area changes month to month. Facts here were checked in October 2026. Before building on a protocol, read its current specification.
 
@@ -61,17 +61,18 @@ Lead with excessive authority, injection paths and missing budgets. Then tool de
 
 ## Phase 4: Change
 
-Start only when the user has chosen what to fix. The list below is the target for new tools and endpoints. On an existing one, add each item in its additive form and report the required form as a breaking change that needs the user's agreement.
+Start when the user asks for a change, or after they choose a finding. The list below is the target for new tools and endpoints. On an existing one, add each item in its compatible form and report a breaking form as a change that needs the user's agreement.
 
 Default design:
 
 - **Tools**: few, each mapped to a task. Names and descriptions written as if briefing a new colleague. Inputs validated. Outputs compact, with names next to identifiers, paginated, and with a concise mode. For large APIs, offer search plus execute instead of one tool per endpoint.
+- **Discovery and description**: an RFC 9727 catalogue discovers the API; OpenAPI describes operations and schemas. Neither grants access.
 - **Errors**: problem-details documents that say what to do next and whether a retry is safe.
-- **Writes**: an idempotency key on every state-changing tool. A dry-run flag on destructive ones. An approval step on high-impact ones.
-- **Identity**: short-lived tokens that name both the person and the agent. No shared keys between a person and an agent. No token passthrough to downstream APIs.
-- **Limits**: by cost (tokens, compute), per agent and per person. Tell the caller what is left. Return `Retry-After`.
+- **Writes**: an idempotency key on every repeat-sensitive tool, scoped to principal plus operation. Store a request fingerprint, claim the key atomically, and retain the result through the retry and reconciliation horizon. Add a dry-run flag on destructive tools and an approval step on high-impact ones.
+- **Identity and authority**: short-lived tokens that name both the person and the agent. OAuth scopes and policy authorise an action and duration; the service still checks tenant, action and exact object. The agent may request authority but cannot approve it for itself. Record the approver, scope, expiry and revocation path. No shared keys and no token passthrough to downstream APIs.
+- **Limits**: by cost (tokens, compute), per agent and per person. Tell the caller what is left. Use `Retry-After` only when the recovery estimate is credible.
 - **Long tasks**: return a task handle at once. Let the caller poll, cancel and resume. Do not hold a connection open for minutes.
-- **Streaming** (your own HTTP API): server-sent events with event identifiers so a dropped connection can resume, and a clear terminal event. In MCP as of the 2026-07-28 revision, a dropped stream is not resumed: the client re-issues the request, so every state-changing tool must be idempotent.
+- **Streaming** (your own HTTP API): server-sent events with event identifiers so a dropped connection can resume, and a clear terminal event. For MCP, check the current transport specification; if a dropped request is re-issued rather than resumed, every state-changing tool must be idempotent.
 - **MCP servers**: stateless, behind your normal gateway, with OAuth resource metadata. Follow the current specification revision.
 - **Budgets**: maximum steps, tokens, time and spend per task, enforced in code outside the model, with a clean stop and a summary when a budget is reached.
 
